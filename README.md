@@ -1,4 +1,4 @@
-# RCJ_JAAVAA2026
+# Robocup Junior Rescue Line 2025-2026
 
-arna wlson, audi, and joshua
+Team members: arna wlson (Arnav Korgoankar), audi (Aditya Mohile), and joshua (Joshua Wei)
 
