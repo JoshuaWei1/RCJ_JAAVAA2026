@@ -2,3 +2,4 @@
 
 Team members: arna wlson (Arnav Korgoankar), audi (Aditya Mohile), and joshua (Joshua Wei)
 
+2nd place at RCJ Nationals 2026
