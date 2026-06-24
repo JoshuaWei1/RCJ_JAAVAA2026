@@ -33,7 +33,7 @@ void setup() {
   pinMode(trigpin, OUTPUT);
   pinMode(echopin, INPUT);
 
-  pinMode(20, INPUT);   //wait for button on cytron motion 2350 pro to be clicked to start
+  pinMode(20, INPUT);   // Wait for button on cytron motion 2350 pro to be clicked to start
   while (digitalRead(20));
 
   Serial1.print('s');
