@@ -1,4 +1,13 @@
-﻿#include <termios.h>                                                         
+﻿/*
+        V1 -- Only 1 set of victims (dead)
+        6/25
+        
+
+
+*/
+
+
+#include <termios.h>                                                         
 #include <stdio.h>
 #include <stdlib.h>        
 #include <string.h>                                                       
@@ -125,7 +134,7 @@ void init(){
 }
 
 
-void move(int lspeed, int rspeed, int type = 0) {
+void move(int lspeed, int rspeed, int type = 1) {
         sprintf(buffer, "[%d,%d,%d]", type, lspeed, rspeed);
         std::cout << "BUFFER: " << buffer << std::endl;
         write(uart0_filestream, &buffer[0], strlen(buffer));
@@ -649,7 +658,7 @@ void yolo(cv::dnn::Net net, Mat img){
 int main() {
         init();
         
-        cv::dnn::Net net = cv::dnn::readNet("/home/pi/Downloads/adi.onnx");
+        cv::dnn::Net net = cv::dnn::readNet("/home/pi/Documents/adi/RCJ_JAAVAA2026/adi(working).onnx");
                 
         if(is_cuda){
                 net.setPreferableBackend(cv::dnn::DNN_BACKEND_CUDA);
@@ -702,6 +711,7 @@ int main() {
         int counter = 0;
         
         while(true) {
+                
                 if(!cam1.getVideoFrame(img, 99999999)) {
                         std::cout << "camera fail!!!!!!!!!!!!!!!!!!!!" << std::endl;
                         break;
@@ -712,39 +722,43 @@ int main() {
                 Mat origin = img;
                 
                 imshow("Video", img);
-                
-                
-                //yolo
-                
+
                 yolo(net, img);
                 
-                
-                if (nms_result.size() > 0) {
-                        for (unsigned long i = 0; i < nms_result.size(); i++) {
+                if (nms_result.size() > 0) { //if anything in view
+                        for (unsigned long i = 0; i < nms_result.size(); i++) { //check through results vector to see what objects are in view
                                 int idx = nms_result[i];
                                 Rect obj = boxes[idx];
                                 
                                 cout << class_ids[idx] << " THIS2" << endl;
                                 
-                                if(class_ids[idx] == 2 && !holding_ball) 
+                                if(class_ids[idx] == 2 && !holding_ball) //dead victim seen and not holding ball
                                 {
-                                        int centerX = obj.x + (obj.width / 2);
-                                        int center = img.cols / 2;
+                                        int centerX = obj.x + (obj.width / 2); //center of ball
+                                        int center = img.cols / 2; //center of screen
                                         cout << centerX << " THIS IS IMPORTANT" << endl;
                                         
-                                        circle(img, Point(centerX, obj.y + obj.height / 2), 8, Scalar(0, 0, 255), -1);
-                                        circle(img, Point(center - 20, obj.y), 8, Scalar(0, 0, 255), -1);
-                                        circle(img, Point(center + 20, obj.y), 8, Scalar(0, 0, 255), -1);
+                                        circle(img, Point(centerX, obj.y + obj.height / 2), 8, Scalar(0, 0, 255), -1); //draws centere
+                                        circle(img, Point(center - 50, obj.y), 8, Scalar(0, 0, 255), -1); //draws left barrier
+                                        circle(img, Point(center + 50, obj.y), 8, Scalar(0, 0, 255), -1); //draws right barrier
                                         cout << "dist" << box_dist[i] << endl;;
-                                        if (centerX > center - 20 && centerX < center + 20) {
+                                        if (centerX > center - 50 && centerX < center + 50) { //if in center, go forward
                                                 cout << "CENTERED" << endl;
-                                                if (box_dist[i] > 3) {
-                                                        move(30, 30);
+                                                if (box_dist[i] > 3) { //move forward
+                                                        if (centerX > center) {
+                                                                move(20, 32);
+                                                        } 
+                                                        else if(centerX == center) {
+                                                                move(25, 25);
+                                                        }
+                                                        else {
+                                                                move (32, 20);
+                                                        }
                                                         cout << "CENTERED" << endl;
                                                         break;
                                                 }
-                                                else {
-                                                        move(40,-40);
+                                                else { // if close. grab ball
+                                                        move(0, 0, 2);
                                                         cout << "here" << endl;
                                                         
                                                         yolo(net, origin); 
@@ -756,13 +770,14 @@ int main() {
                                         }
                                         
                                 } 
-                                else if (holding_ball && counter == 1) {
+                                else if (holding_ball && counter == 1) { //dead zone seen and holding ball
+                                        cout << holding_ball << endl;
                                         int idx = nms_result[i];
                                         Rect obj = boxes[idx];
                                         
                                         cout << class_ids[idx] << " we looking for da box" << endl;
                                         
-                                        if(class_ids[idx] == 1) {
+                                        if(class_ids[idx] == 3) {
                                                 int centerX = obj.x + (obj.width / 2);
                                                 int center = img.cols / 2;
                                                 cout << centerX << "         THIS IS zone" << endl;
@@ -792,10 +807,13 @@ int main() {
                                                 }
                                         }
                                 }
+                                else {
+                                        move(-20, 20);
+                                }
                         }
                 } else 
                 {
-                        move(-30, 30);
+                        move(-20, 20);
                 }
                 
                                 
@@ -826,8 +844,3 @@ int main() {
         cam1.stopVideo();
         cv::destroyAllWindows();
 }
-
-
-
-
-p
