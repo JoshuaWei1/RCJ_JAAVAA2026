@@ -119,7 +119,6 @@ bool contour_cmp(std::vector<cv::Point> &a, std::vector<cv::Point> &b) {
 void clear_buffer()	{
 	memset(rx_buffer, 0, sizeof(rx_buffer));
 	//uart0_filestream.clear();
-	
 }
 
 void detectSilver(cv::Mat img){
@@ -158,34 +157,23 @@ void detectSilver(cv::Mat img){
 }
 
 void greensquare(cv::Mat img) {
-	//std::cout << "Finding greensquare. " << std::endl;
 	std::vector<std::vector<cv::Point>> Contours;
 	cv::Mat hsvimg, grayimg;
 	cv::Rect r;
 	bool leftgreen = false, rightgreen = false, doublegreen = false;
 	
-	//std::cout << "about to convert color:" << std::endl;
-	//img = img(cv::Rect(0, 40, 320, 200));
 	cv::cvtColor(img, grayimg, cv::COLOR_BGR2GRAY);
 	cv::threshold(grayimg, grayimg, 127, 255, cv::THRESH_BINARY_INV);
-	//std::cout << "grayimg" << std::endl;
 	cv::cvtColor(img, hsvimg, cv::COLOR_BGR2HSV);
-	//std::cout << "color converted." << std::endl;
 	
 	//low h s v - high h s v
 	inRange(hsvimg, cv::Scalar(0, 100, 50), cv::Scalar(180, 255, 245), hsvimg); 
-	//0 110 50 170 255 195
-	//SR 2026 - 0, 107, 70  - 98, 255, 195
-	
-	
-	//43, 100, 50 - 94, 255, 255 : home
-	//inRange(hsvimg, cv::Scalar(0, 110, 101), cv::Scalar(180, 235, 205), hsvimg);
-	//std::cout << "thresholded" << std::endl;
 	
 	findContours(hsvimg, Contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 	//std::cout << "Contours found." << std::endl;
 	int gscount = 0;
 	int adicount = 0;
+	
 	while(1) {
 		for(auto& cnt : Contours) {
 				//std::cout << "Searching greensquare contours" << std::endl;
@@ -233,8 +221,6 @@ void greensquare(cv::Mat img) {
 				std::cout << "topbottom" << (int)grayimg.at<uchar>(top) << "," << (int)grayimg.at<uchar>(bottom);
 				std::cout << "leftRight" << (int)grayimg.at<uchar>(left) << "," << (int)grayimg.at<uchar>(right);
 				
-				
-				
 				//255=white, 0 =black
 				if(grayimg.at<uchar>(bottom) == 0 && grayimg.at<uchar>(top) == 255) {
 					putText(img, "False Green", cv::Point(5, 30) , cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 255));
@@ -253,10 +239,6 @@ void greensquare(cv::Mat img) {
 						
 						move(0, 0);
 						std::this_thread::sleep_for(1000ms);
-						
-						/*if(grayimg.at<uchar>(left) == 0) {
-						rightgreen = true;
-						}*/
 					}
 					
 					move(0, 0);
@@ -273,14 +255,9 @@ void greensquare(cv::Mat img) {
 						
 						move(0, 0);
 						std::this_thread::sleep_for(1000ms);
-						
-						/*if(grayimg.at<uchar>(right) == 0) {
-						leftgreen = true;
-						}*/
 					}
 				}
 			}
-			
 			
 			if (adicount == 1) {
 				adicount++;
@@ -336,8 +313,7 @@ void greensquare(cv::Mat img) {
 						
 		leftgreen = rightgreen = false;
 		
-		imshow("greensquare", img);	
-			
+		imshow("greensquare", img);				
 }
 
 bool detectRed(cv::Mat img) {
@@ -373,10 +349,6 @@ bool detectRed(cv::Mat img) {
 	}
 }
 
-void linetrace(cv::Mat img, std::vector<std::vector<cv::Point>> Contour) {
-	
-}
-
 int printtest(){
 	while(true){
 		char buffer[15] = "hi\n";
@@ -405,7 +377,7 @@ void obstacle() {
 			}
 			
 			if(dist <= 8 && dist > 0 && objCheck == false) {                       //OBSTACLE AVOIDANCE HERE
-				std::cout << "OBJ!" << std::endl;
+				std::cout << "OBJ!" << std::endl;								  //HARDCODED FOR NOW
 				float robotDiam = 16;
 				int objDiam = 5;
 				float outDiam = objDiam + 2*(robotDiam + dist);
@@ -444,15 +416,13 @@ double distance_between_points_manual(const cv::Point& p1, const cv::Point& p2) 
 }
 
 int main() {
-	
-	
 	init();
 	
-	char read_buffer[3];
+	char read_buffer[3];  
 	if(uart0_filestream != -1) {
 		int readBytes = read(uart0_filestream, read_buffer, 3);
 	
-		while(readBytes <= 0) {
+		while(readBytes <= 0) {  		//wait for button on Motion 2350 Pro to be pressed
 			readBytes = read(uart0_filestream, read_buffer, 3);
 			std::cout << "waiting for cytron to start... " << std::endl;
 			sleep(1);
@@ -463,8 +433,6 @@ int main() {
 		while(1);
 	}
 	std::cout << "Starting..." << std::endl;
-	
-	
 	char input;
 	std::vector<std::vector<cv::Point>> Contours, middleCont;
 	bool stopmotors = false;
@@ -522,7 +490,6 @@ int main() {
 		float targetVal = 160; //Center of the screen; 160
 		float kp = 0.3;//0.35
 		
-		 //215 
 		if(centroid.y < 30) {//may have to change value - panic kp
 			kp = 0.5;
 			std::cout << "    !!!!!!!!!!    PANIC" << std::endl;
@@ -531,8 +498,6 @@ int main() {
 			kp = 0.4;
 		}
 		
-		//kp=0.00456*(220.0-centroid.y)-0.1083;
-				
 		float error = targetVal-centroid.x;                 
 		float speedChange = error * kp;
 		
@@ -583,8 +548,6 @@ int main() {
 			move(0,0);
 			std::this_thread::sleep_for(10000ms);
 		}*/
-		
-		//obstacle();
 		
 		greensquare(img);		/////////////////////////////////////////////////////////////////////////////////////////////////////GREEN SQUARE!!!
 		
