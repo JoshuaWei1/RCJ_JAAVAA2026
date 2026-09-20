@@ -1,4 +1,4 @@
-﻿/*
+/*
         V1 -- Only 1 set of victims (dead)
         6/25
         
@@ -751,13 +751,14 @@ int main() {
                                                         else if(centerX == center) {
                                                                 move(25, 25);
                                                         }
-                                                        else {
+                                      t7                  else {
                                                                 move (32, 20);
                                                         }
                                                         cout << "CENTERED" << endl;
                                                         break;
                                                 }
                                                 else { // if close. grab ball
+                                                        move(0,0);
                                                         move(0, 0, 2);
                                                         cout << "here" << endl;
                                                         
